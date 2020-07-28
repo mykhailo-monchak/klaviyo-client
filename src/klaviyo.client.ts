@@ -1,5 +1,6 @@
 import { KlaviyoProfileIdentifier, KlaviyoProfile, KlaviyoEvent } from './klaviyo.types';
 import axios, { AxiosError } from 'axios';
+import { encode } from 'js-base64';
 
 export class KlaviyoClient {
   constructor(private readonly apiKey: string, private readonly token: string) {}
@@ -121,7 +122,7 @@ export class KlaviyoClient {
       properties: profile,
     };
 
-    const payload = btoa(JSON.stringify(params));
+    const payload = encode(JSON.stringify(params));
 
     try {
       const response = await axios.get<boolean>(`https://a.klaviyo.com/api/identify`, { params: { data: payload } });
@@ -151,7 +152,7 @@ export class KlaviyoClient {
       customer_properties: profile,
       properties: event,
     };
-    const payload = btoa(JSON.stringify(params));
+    const payload = encode(JSON.stringify(params));
 
     try {
       const response = await axios.get<boolean>(`https://a.klaviyo.com/api/track`, { params: { data: payload } });
