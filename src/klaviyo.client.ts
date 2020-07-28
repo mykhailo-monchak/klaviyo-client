@@ -45,11 +45,11 @@ export class KlaviyoClient {
   }
 
   // See https://www.klaviyo.com/docs/api/people#person for details
-  public async getProfile(id: string): Promise<KlaviyoProfile> {
+  public async getProfile<T extends Record<string, unknown>>(id: string): Promise<KlaviyoProfile<T>> {
     const params = { api_key: this.apiKey };
 
     try {
-      const response = await axios.get<KlaviyoProfile>(`https://a.klaviyo.com/api/v1/person/${id}`, { params });
+      const response = await axios.get<KlaviyoProfile<T>>(`https://a.klaviyo.com/api/v1/person/${id}`, { params });
 
       return response.data;
     } catch (e) {
@@ -69,12 +69,15 @@ export class KlaviyoClient {
   }
 
   // See https://www.klaviyo.com/docs/api/people#metrics-timeline for details
-  public async getProfileEvents(id: string, since: string = null): Promise<KlaviyoEvent[]> {
-    const events: KlaviyoEvent[] = [];
+  public async getProfileEvents<T extends Record<string, unknown>>(
+    id: string,
+    since: string = null,
+  ): Promise<KlaviyoEvent<T>[]> {
+    const events: KlaviyoEvent<T>[] = [];
     const params = { api_key: this.apiKey, since };
 
     try {
-      let response = await axios.get<PersonEventsResponse>(
+      let response = await axios.get<PersonEventsResponse<T>>(
         `https://a.klaviyo.com/api/v1/person/${id}/metrics/timeline`,
         { params: params },
       );
@@ -83,9 +86,12 @@ export class KlaviyoClient {
 
       while (response.data.next) {
         params.since = response.data.next;
-        response = await axios.get<PersonEventsResponse>(`https://a.klaviyo.com/api/v1/person/${id}/metrics/timeline`, {
-          params: params,
-        });
+        response = await axios.get<PersonEventsResponse<T>>(
+          `https://a.klaviyo.com/api/v1/person/${id}/metrics/timeline`,
+          {
+            params: params,
+          },
+        );
 
         events.push(...response.data.data);
       }
@@ -97,7 +103,7 @@ export class KlaviyoClient {
 
         if (e.response.status === 429) {
           await this.waitForRetry(e);
-          events.push(...(await this.getProfileEvents(id, params.since)));
+          events.push(...(await this.getProfileEvents<T>(id, params.since)));
           return events;
         }
       }
@@ -109,7 +115,7 @@ export class KlaviyoClient {
   }
 
   // See https://www.klaviyo.com/docs/http-api#identify for details
-  public async identify(profile: Partial<KlaviyoProfile>): Promise<boolean> {
+  public async identify<T extends Record<string, unknown>>(profile: Partial<KlaviyoProfile<T>>): Promise<boolean> {
     const params = {
       token: this.token,
       properties: profile,
@@ -134,9 +140,9 @@ export class KlaviyoClient {
   }
 
   // See https://www.klaviyo.com/docs/http-api#track for details
-  public async track(
+  public async track<T extends Record<string, unknown>>(
     eventName: string,
-    profile: Partial<KlaviyoProfile>,
+    profile: Partial<KlaviyoProfile<T>>,
     event: Record<string, unknown>,
   ): Promise<boolean> {
     const params = {
@@ -169,10 +175,10 @@ export class KlaviyoClient {
   }
 }
 
-interface PersonEventsResponse {
+interface PersonEventsResponse<T extends Record<string, unknown>> {
   count: number;
   object: string;
-  data: KlaviyoEvent[];
+  data: KlaviyoEvent<T>[];
   next: string;
 }
 

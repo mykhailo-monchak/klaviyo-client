@@ -1,4 +1,4 @@
-export interface KlaviyoProfile {
+export type KlaviyoProfile<T extends Record<string, unknown>> = T & {
   $id: string;
   $email: string;
   $first_name: string;
@@ -13,21 +13,21 @@ export interface KlaviyoProfile {
   $image: string;
   $consent: string;
   $timezone: string;
-}
+};
 
 export interface KlaviyoProfileIdentifier {
   id: string;
   email: string;
 }
 
-export interface KlaviyoEvent {
+export interface KlaviyoEvent<T extends Record<string, unknown>> {
   event_properties: Record<string, unknown>;
   uuid?: string;
   event_name: string;
   timestamp?: number;
   object?: string;
   datetime?: string;
-  person?: KlaviyoProfile;
+  person?: KlaviyoProfile<T>;
   statistic_id?: string;
   id?: string;
 }
