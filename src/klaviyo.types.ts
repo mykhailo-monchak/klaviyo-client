@@ -1,4 +1,4 @@
-export type KlaviyoProfile<T extends { [key: string]: unknown }> = T & {
+export type KlaviyoProfile<T extends Record<string, unknown>> = T & {
   $id: string;
   $email: string;
   $first_name: string;
@@ -20,7 +20,7 @@ export interface KlaviyoProfileIdentifier {
   email: string;
 }
 
-export interface KlaviyoEvent<T extends { [key: string]: unknown }> {
+export interface KlaviyoEvent<T extends Record<string, unknown>> {
   event_properties: Record<string, unknown>;
   uuid?: string;
   event_name: string;

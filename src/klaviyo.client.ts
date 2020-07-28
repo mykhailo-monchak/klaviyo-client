@@ -45,7 +45,7 @@ export class KlaviyoClient {
   }
 
   // See https://www.klaviyo.com/docs/api/people#person for details
-  public async getProfile<T extends { [key: string]: unknown }>(id: string): Promise<KlaviyoProfile<T>> {
+  public async getProfile<T extends Record<string, unknown>>(id: string): Promise<KlaviyoProfile<T>> {
     const params = { api_key: this.apiKey };
 
     try {
@@ -69,7 +69,7 @@ export class KlaviyoClient {
   }
 
   // See https://www.klaviyo.com/docs/api/people#metrics-timeline for details
-  public async getProfileEvents<T extends { [key: string]: unknown }>(
+  public async getProfileEvents<T extends Record<string, unknown>>(
     id: string,
     since: string = null,
   ): Promise<KlaviyoEvent<T>[]> {
@@ -115,7 +115,7 @@ export class KlaviyoClient {
   }
 
   // See https://www.klaviyo.com/docs/http-api#identify for details
-  public async identify<T extends { [key: string]: unknown }>(profile: Partial<KlaviyoProfile<T>>): Promise<boolean> {
+  public async identify<T extends Record<string, unknown>>(profile: Partial<KlaviyoProfile<T>>): Promise<boolean> {
     const params = {
       token: this.token,
       properties: profile,
@@ -140,7 +140,7 @@ export class KlaviyoClient {
   }
 
   // See https://www.klaviyo.com/docs/http-api#track for details
-  public async track<T extends { [key: string]: unknown }>(
+  public async track<T extends Record<string, unknown>>(
     eventName: string,
     profile: Partial<KlaviyoProfile<T>>,
     event: Record<string, unknown>,
@@ -175,7 +175,7 @@ export class KlaviyoClient {
   }
 }
 
-interface PersonEventsResponse<T extends { [key: string]: unknown }> {
+interface PersonEventsResponse<T extends Record<string, unknown>> {
   count: number;
   object: string;
   data: KlaviyoEvent<T>[];
