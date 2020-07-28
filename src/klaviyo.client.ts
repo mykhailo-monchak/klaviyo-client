@@ -10,12 +10,17 @@ export class KlaviyoClient {
     const params = { api_key: this.apiKey, marker };
 
     try {
-      let response = await axios.get<GroupMembersResponse>(`v2/group/${groupId}/members/all`, { data: params });
+      let response = await axios.get<GroupMembersResponse>(
+        `https://a.klaviyo.com/api/v2/group/${groupId}/members/all`,
+        { data: params },
+      );
       profiles.push(...response.data.records);
 
       while (response.data.marker) {
         params.marker = response.data.marker;
-        response = await axios.get<GroupMembersResponse>(`v2/group/${groupId}/members/all`, { data: params });
+        response = await axios.get<GroupMembersResponse>(`https://a.klaviyo.com/api/v2/group/${groupId}/members/all`, {
+          data: params,
+        });
 
         profiles.push(...response.data.records);
       }
@@ -44,7 +49,7 @@ export class KlaviyoClient {
     const params = { api_key: this.apiKey };
 
     try {
-      const response = await axios.get<KlaviyoProfile>(`v1/person/${id}`, { params });
+      const response = await axios.get<KlaviyoProfile>(`https://a.klaviyo.com/api/v1/person/${id}`, { params });
 
       return response.data;
     } catch (e) {
@@ -69,13 +74,18 @@ export class KlaviyoClient {
     const params = { api_key: this.apiKey, since };
 
     try {
-      let response = await axios.get<PersonEventsResponse>(`v1/person/${id}/metrics/timeline`, { params: params });
+      let response = await axios.get<PersonEventsResponse>(
+        `https://a.klaviyo.com/api/v1/person/${id}/metrics/timeline`,
+        { params: params },
+      );
 
       events.push(...response.data.data);
 
       while (response.data.next) {
         params.since = response.data.next;
-        response = await axios.get<PersonEventsResponse>(`v1/person/${id}/metrics/timeline`, { params: params });
+        response = await axios.get<PersonEventsResponse>(`https://a.klaviyo.com/api/v1/person/${id}/metrics/timeline`, {
+          params: params,
+        });
 
         events.push(...response.data.data);
       }
@@ -108,7 +118,7 @@ export class KlaviyoClient {
     const payload = btoa(JSON.stringify(params));
 
     try {
-      const response = await axios.get<boolean>(`identify`, { params: { data: payload } });
+      const response = await axios.get<boolean>(`https://a.klaviyo.com/api/identify`, { params: { data: payload } });
 
       return response.data;
     } catch (e) {
@@ -138,7 +148,7 @@ export class KlaviyoClient {
     const payload = btoa(JSON.stringify(params));
 
     try {
-      const response = await axios.get<boolean>(`track`, { params: { data: payload } });
+      const response = await axios.get<boolean>(`https://a.klaviyo.com/api/track`, { params: { data: payload } });
 
       return response.data;
     } catch (e) {
