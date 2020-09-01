@@ -23,12 +23,14 @@
     "prepublishOnly": "npm run lint",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "postversion": "git push && git push --tags",
+    "pub": "npm version patch && npm publish"
   },
   "devDependencies": {
-    "@types/axios": "^0.14.0",
+    "@types/node": "^14.6.2",
     "@typescript-eslint/eslint-plugin": "^3.7.1",
     "@typescript-eslint/parser": "^3.7.1",
+    "dotenv": "^8.2.0",
     "eslint": "^7.5.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.22.0",
@@ -47,7 +49,7 @@
     }
   },
   "dependencies": {
-    "axios": "^0.19.2",
+    "cross-fetch": "^3.0.5",
     "js-base64": "^3.3.2"
   }
 }

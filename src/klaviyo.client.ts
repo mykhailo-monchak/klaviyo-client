@@ -1,6 +1,7 @@
 import { KlaviyoProfileIdentifier, KlaviyoProfile, KlaviyoEvent } from './klaviyo.types';
-import axios, { AxiosError } from 'axios';
 import { encode } from 'js-base64';
+import fetch from 'cross-fetch';
+import { KlaviyoError } from '.';
 
 export class KlaviyoClient {
   constructor(private readonly apiKey: string, private readonly token: string) {}
@@ -8,38 +9,31 @@ export class KlaviyoClient {
   // See https://www.klaviyo.com/docs/api/v2/lists#get-members-all for details
   public async getGroupProfiles(groupId: string, marker: number = null): Promise<KlaviyoProfileIdentifier[]> {
     const profiles: KlaviyoProfileIdentifier[] = [];
-    const params = { api_key: this.apiKey, marker };
+    let url = `https://a.klaviyo.com/api/v2/group/${groupId}/members/all?api_key=${encodeURI(this.apiKey)}`;
 
-    try {
-      let response = await axios.get<GroupMembersResponse>(
-        `https://a.klaviyo.com/api/v2/group/${groupId}/members/all`,
-        { data: params },
-      );
-      profiles.push(...response.data.records);
+    if (marker != null) {
+      url = `${url}&marker=${encodeURI('' + marker)}`;
+    }
 
-      while (response.data.marker) {
-        params.marker = response.data.marker;
-        response = await axios.get<GroupMembersResponse>(`https://a.klaviyo.com/api/v2/group/${groupId}/members/all`, {
-          data: params,
-        });
+    const res: Response = await fetch(url);
 
-        profiles.push(...response.data.records);
+    if (res.ok) {
+      const data = (await res.json()) as GroupMembersResponse;
+      profiles.push(...data.records);
+
+      if (data.marker != null) {
+        const nextProfiles = await this.getGroupProfiles(groupId, data.marker);
+        profiles.push(...nextProfiles);
       }
-    } catch (e) {
-      if (e.response && e.response.status) {
-        if (e.response.status === 404) {
-          return profiles;
-        }
-
-        if (e.response.status === 429) {
-          await this.waitForRetry(e);
-          const nextProfiles = await this.getGroupProfiles(groupId, params.marker);
-          profiles.push(...nextProfiles);
-          return profiles;
-        }
-      }
-
-      throw e;
+    } else if (res.status === 404) {
+      return profiles;
+    } else if (res.status === 429) {
+      await this.waitForRetry(res);
+      const nextProfiles = await this.getGroupProfiles(groupId, marker);
+      profiles.push(...nextProfiles);
+      return profiles;
+    } else {
+      throw new KlaviyoError(res);
     }
 
     return profiles;
@@ -47,25 +41,19 @@ export class KlaviyoClient {
 
   // See https://www.klaviyo.com/docs/api/people#person for details
   public async getProfile<T extends Record<string, unknown>>(id: string): Promise<KlaviyoProfile<T>> {
-    const params = { api_key: this.apiKey };
+    const url = `https://a.klaviyo.com/api/v1/person/${id}?api_key=${encodeURI(this.apiKey)}`;
 
-    try {
-      const response = await axios.get<KlaviyoProfile<T>>(`https://a.klaviyo.com/api/v1/person/${id}`, { params });
+    const res: Response = await fetch(url);
 
-      return response.data;
-    } catch (e) {
-      if (e.response && e.response.status) {
-        if (e.response.status === 404) {
-          return null;
-        }
-
-        if (e.response.status === 429) {
-          await this.waitForRetry(e);
-          return await this.getProfile(id);
-        }
-      }
-
-      throw e;
+    if (res.ok) {
+      return (await res.json()) as KlaviyoProfile<T>;
+    } else if (res.status === 404) {
+      return null;
+    } else if (res.status === 429) {
+      await this.waitForRetry(res);
+      return await this.getProfile(id);
+    } else {
+      throw new KlaviyoError(res);
     }
   }
 
@@ -75,41 +63,31 @@ export class KlaviyoClient {
     since: string = null,
   ): Promise<KlaviyoEvent<T>[]> {
     const events: KlaviyoEvent<T>[] = [];
-    const params = { api_key: this.apiKey, since };
+    let url = `https://a.klaviyo.com/api/v1/person/${id}/metrics/timeline?api_key=${encodeURI(this.apiKey)}`;
 
-    try {
-      let response = await axios.get<PersonEventsResponse<T>>(
-        `https://a.klaviyo.com/api/v1/person/${id}/metrics/timeline`,
-        { params: params },
-      );
+    if (since != null) {
+      url = `${url}&since=${encodeURI(since)}`;
+    }
 
-      events.push(...response.data.data);
+    const res: Response = await fetch(url);
 
-      while (response.data.next) {
-        params.since = response.data.next;
-        response = await axios.get<PersonEventsResponse<T>>(
-          `https://a.klaviyo.com/api/v1/person/${id}/metrics/timeline`,
-          {
-            params: params,
-          },
-        );
+    if (res.ok) {
+      const data = (await res.json()) as PersonEventsResponse<T>;
+      events.push(...data.data);
 
-        events.push(...response.data.data);
+      if (data.next != null) {
+        const nextEvents = await this.getProfileEvents<T>(id, data.next);
+        events.push(...nextEvents);
       }
-    } catch (e) {
-      if (e.response && e.response.status) {
-        if (e.response.status === 404) {
-          return events;
-        }
-
-        if (e.response.status === 429) {
-          await this.waitForRetry(e);
-          events.push(...(await this.getProfileEvents<T>(id, params.since)));
-          return events;
-        }
-      }
-
-      throw e;
+    } else if (res.status === 404) {
+      return events;
+    } else if (res.status === 429) {
+      await this.waitForRetry(res);
+      const nextEvents = await this.getProfileEvents<T>(id, since);
+      events.push(...nextEvents);
+      return events;
+    } else {
+      throw new KlaviyoError(res);
     }
 
     return events;
@@ -124,19 +102,17 @@ export class KlaviyoClient {
 
     const payload = encode(JSON.stringify(params));
 
-    try {
-      const response = await axios.get<boolean>(`https://a.klaviyo.com/api/identify`, { params: { data: payload } });
+    const url = `https://a.klaviyo.com/api/identify?data=${payload}`;
 
-      return response.data;
-    } catch (e) {
-      if (e.response && e.response.status) {
-        if (e.response.status === 429) {
-          await this.waitForRetry(e);
-          return await this.identify(profile);
-        }
-      }
+    const res: Response = await fetch(url);
 
-      throw e;
+    if (res.ok) {
+      return (await res.json()) as boolean;
+    } else if (res.status === 429) {
+      await this.waitForRetry(res);
+      return await this.identify(profile);
+    } else {
+      throw new KlaviyoError(res);
     }
   }
 
@@ -152,26 +128,25 @@ export class KlaviyoClient {
       customer_properties: profile,
       properties: event,
     };
+
     const payload = encode(JSON.stringify(params));
 
-    try {
-      const response = await axios.get<boolean>(`https://a.klaviyo.com/api/track`, { params: { data: payload } });
+    const url = `https://a.klaviyo.com/api/track?data=${payload}`;
 
-      return response.data;
-    } catch (e) {
-      if (e.response && e.response.status) {
-        if (e.response.status === 429) {
-          await this.waitForRetry(e);
-          return await this.track(eventName, profile, event);
-        }
-      }
+    const res: Response = await fetch(url);
 
-      throw e;
+    if (res.ok) {
+      return (await res.json()) as boolean;
+    } else if (res.status === 429) {
+      await this.waitForRetry(res);
+      return await this.identify(profile);
+    } else {
+      throw new KlaviyoError(res);
     }
   }
 
-  private async waitForRetry(e: AxiosError) {
-    const time = 1000 * e.response.headers['retry-after'] || 3000;
+  private async waitForRetry(r: Response) {
+    const time = 1000 * r.headers['retry-after'] || 3000;
     await new Promise((resolve) => setTimeout(resolve, time));
   }
 }
