@@ -1,7 +1,6 @@
-import { KlaviyoProfileIdentifier, KlaviyoProfile, KlaviyoEvent } from './klaviyo.types';
 import { encode } from 'js-base64';
 import fetch from 'cross-fetch';
-import { KlaviyoError } from '.';
+import { KlaviyoError, KlaviyoProfileIdentifier, KlaviyoProfile, KlaviyoEvent } from '.';
 
 export class KlaviyoClient {
   constructor(private readonly apiKey: string, private readonly token: string) {}
