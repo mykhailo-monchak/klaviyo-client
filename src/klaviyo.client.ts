@@ -7,7 +7,7 @@ export class KlaviyoClient {
   constructor(private readonly token: string) {}
 
   // See https://www.klaviyo.com/docs/http-api#identify for details
-  public async identify(profile: Partial<KlaviyoTrackProfile>): Promise<boolean> {
+  public async identify(profile: Partial<KlaviyoTrackProfile>): Promise<number> {
     const params = {
       token: this.token,
       properties: profile,
@@ -20,7 +20,7 @@ export class KlaviyoClient {
     const res: Response = await fetch(url);
 
     if (res.ok) {
-      return (await res.json()) as boolean;
+      return (await res.json()) as number;
     } else if (res.status === 429) {
       await waitForRetry(res);
       return await this.identify(profile);
@@ -34,7 +34,7 @@ export class KlaviyoClient {
     eventName: string,
     profile: Partial<KlaviyoTrackProfile>,
     event: Partial<KlaviyoEventProperties>,
-  ): Promise<boolean> {
+  ): Promise<number> {
     const params = {
       token: this.token,
       event: eventName,
@@ -49,7 +49,7 @@ export class KlaviyoClient {
     const res: Response = await fetch(url);
 
     if (res.ok) {
-      return (await res.json()) as boolean;
+      return (await res.json()) as number;
     } else if (res.status === 429) {
       await waitForRetry(res);
       return await this.track(eventName, profile, event);
