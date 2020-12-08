@@ -23,6 +23,7 @@ The package contains two separate classes:
   - get profiles from list and segments
   - get complete profile data
   - get a list of profile events
+  - get a list of profile events by metric ID
 
 The package supports providing generic event or profile properties types in order to work in well-known types manner.
 
