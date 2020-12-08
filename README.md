@@ -22,6 +22,7 @@ The package contains two separate classes:
 - `KlaviyoApi` to work with Klaviyo API. Klaviyo Token and API key are needed to use it. Currently it supports following operations:
   - get profiles from list and segments
   - get complete profile data
+  - create or update profile data
   - get a list of profile events
   - get a list of profile events by metric ID
 
