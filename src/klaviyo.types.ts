@@ -51,14 +51,14 @@ export type KlaviyoEventProperties = Record<string, unknown> & {
   $message_interaction: string;
 };
 
-export type KlaviyoEvent = {
+export type KlaviyoEvent<TP extends Record<string, unknown>, TE extends Record<string, unknown>> = {
   object: 'event';
   uuid: string;
   id: string;
-  event_properties: KlaviyoEventProperties;
+  event_properties: KlaviyoEventProperties & TE;
   event_name: string;
   timestamp: number;
   datetime: string;
-  person: KlaviyoProfile;
+  person: KlaviyoProfile & TP;
   statistic_id: string;
 };

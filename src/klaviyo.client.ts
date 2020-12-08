@@ -7,7 +7,7 @@ export class KlaviyoClient {
   constructor(private readonly token: string) {}
 
   // See https://www.klaviyo.com/docs/http-api#identify for details
-  public async identify(profile: Partial<KlaviyoTrackProfile>): Promise<number> {
+  public async identify<T extends Record<string, unknown>>(profile: Partial<KlaviyoTrackProfile> & T): Promise<number> {
     const params = {
       token: this.token,
       properties: profile,
@@ -30,10 +30,10 @@ export class KlaviyoClient {
   }
 
   // See https://www.klaviyo.com/docs/http-api#track for details
-  public async track(
+  public async track<TP extends Record<string, unknown>, TE extends Record<string, unknown>>(
     eventName: string,
-    profile: Partial<KlaviyoTrackProfile>,
-    event: Partial<KlaviyoEventProperties>,
+    profile: Partial<KlaviyoTrackProfile> & TP,
+    event: Partial<KlaviyoEventProperties> & TE,
   ): Promise<number> {
     const params = {
       token: this.token,

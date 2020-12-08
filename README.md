@@ -14,48 +14,17 @@ or
 yarn add klaviyo-client
 ```
 
-## Simple Example
+## Usage
 
-As demonstrated by this example, you can:
+The package contains two separate classes:
 
-- identify profiles
-- track their events
-- get profiles from list and segments
-- get complete profile data
-- get a list of profile events
+- `KlaviyoClient` to identify profiles and track events. Klaviyo Token is needed to use it
+- `KlaviyoApi` to work with Klaviyo API. Klaviyo Token and API key are needed to use it. Currently it supports following operations:
+  - get profiles from list and segments
+  - get complete profile data
+  - get a list of profile events
 
-And also you can define strongly-typed profile properties.
-
-```typescript
-import { KlaviyoClient } from 'klaviyo-client';
-
-...
-
-type CustomKlaviyoProfileProperties = {
-  status: 'happy' | 'excited';
-};
-
-...
-
-await klaviyo.identify<CustomKlaviyoProfileProperties>({ $email: 'test@example.com', status: 'happy' });
-
-await klaviyo.track<CustomKlaviyoProfileProperties>(
-    'smiled',
-    { $email: 'test@example.com', status: 'excited' },
-    { reason: 'because of you' },
-);
-
-const persons = await klaviyo.getGroupProfiles('XV77mQ');
-console.log(`There are ${persons.length} happy persons.`);
-
-for (const p of persons) {
-    const person = await klaviyo.getProfile<CustomKlaviyoProfileProperties>(p.id);
-    console.log(`${person.$first_name} is ${person.status}.`);
-
-    const events = await klaviyo.getProfileEvents(p.id);
-    console.log(`${person.$first_name} has smiled ${events.length} times.`);
-}
-```
+The package supports providing generic event or profile properties types in order to work in well-known types manner.
 
 ## Configuration
 
