@@ -34,6 +34,10 @@ async function test() {
   const profile = await api.Profiles.getProfile(process.env.TEST_PROFILE_ID);
   const profileCustom = await api.Profiles.getProfile<CustomKlaviyoProfile>(process.env.TEST_PROFILE_ID);
 
+  const profileUpdated = await api.Profiles.updateProfile<CustomKlaviyoProfile>(profileCustom.id, {
+    status: 'happy',
+  });
+
   const events = await api.Profiles.getProfileEvents(process.env.TEST_PROFILE_ID);
   const eventsCustom = await api.Profiles.getProfileEvents<CustomKlaviyoProfile, CustomKlaviyoEvent>(
     process.env.TEST_PROFILE_ID,

@@ -33,8 +33,6 @@ export type KlaviyoProfile = Record<string, unknown> & {
   $consent: string | string[];
   $consent_timestamp: string;
   $timezone: string;
-  $longitude: string;
-  $latitude: string;
 };
 
 export type KlaviyoProfileIdentifier = {

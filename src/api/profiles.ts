@@ -30,6 +30,31 @@ export class ProfilesKlaviyoApi {
     }
   }
 
+  // See https://www.klaviyo.com/docs/api/people#person for details
+  public async updateProfile<T extends Record<string, unknown>>(
+    id: string,
+    profile: Partial<KlaviyoProfile & T>,
+  ): Promise<KlaviyoProfile & T> {
+    let url = `https://a.klaviyo.com/api/v1/person/${id}?api_key=${encodeURI(this.apiKey)}`;
+
+    for (const key in profile) {
+      url += `&${key}=${profile[key]}`;
+    }
+
+    const res: Response = await fetch(url, { method: 'put' });
+
+    if (res.ok) {
+      return (await res.json()) as KlaviyoProfile & T;
+    } else if (res.status === 404) {
+      return null;
+    } else if (res.status === 429) {
+      await waitForRetry(res);
+      return await this.updateProfile(id, profile);
+    } else {
+      throw new KlaviyoError(res);
+    }
+  }
+
   // See https://www.klaviyo.com/docs/api/people#metrics-timeline for details
   public async getProfileEvents<TP extends Record<string, unknown>, TE extends Record<string, unknown>>(
     id: string,
