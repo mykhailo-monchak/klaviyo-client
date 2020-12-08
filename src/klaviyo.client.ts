@@ -1,4 +1,4 @@
-import { KlaviyoError, KlaviyoProfile } from '.';
+import { KlaviyoError, KlaviyoEventProperties, KlaviyoTrackProfile } from '.';
 import { encode } from 'punycode';
 import { waitForRetry } from './utils/wait-for-retry';
 import fetch from 'cross-fetch';
@@ -7,7 +7,7 @@ export class KlaviyoClient {
   constructor(private readonly token: string) {}
 
   // See https://www.klaviyo.com/docs/http-api#identify for details
-  public async identify<T extends Record<string, unknown>>(profile: Partial<KlaviyoProfile<T>>): Promise<boolean> {
+  public async identify(profile: Partial<KlaviyoTrackProfile>): Promise<boolean> {
     const params = {
       token: this.token,
       properties: profile,
@@ -30,10 +30,10 @@ export class KlaviyoClient {
   }
 
   // See https://www.klaviyo.com/docs/http-api#track for details
-  public async track<T extends Record<string, unknown>>(
+  public async track(
     eventName: string,
-    profile: Partial<KlaviyoProfile<T>>,
-    event: Record<string, unknown>,
+    profile: Partial<KlaviyoTrackProfile>,
+    event: Partial<KlaviyoEventProperties>,
   ): Promise<boolean> {
     const params = {
       token: this.token,
