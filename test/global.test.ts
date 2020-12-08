@@ -43,6 +43,15 @@ async function test() {
     process.env.TEST_PROFILE_ID,
   );
 
+  const eventsByMetric = await api.Profiles.getProfileEventsByMetric(
+    process.env.TEST_PROFILE_ID,
+    events[0]?.statistic_id,
+  );
+  const eventsCustomByMetric = await api.Profiles.getProfileEventsByMetric<CustomKlaviyoProfile, CustomKlaviyoEvent>(
+    process.env.TEST_PROFILE_ID,
+    events[0]?.statistic_id,
+  );
+
   console.log('tested');
 }
 

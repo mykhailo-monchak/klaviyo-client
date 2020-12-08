@@ -90,4 +90,41 @@ export class ProfilesKlaviyoApi {
 
     return events;
   }
+
+  // See https://www.klaviyo.com/docs/api/people#metric-timeline for details
+  public async getProfileEventsByMetric<TP extends Record<string, unknown>, TE extends Record<string, unknown>>(
+    id: string,
+    metricId: string,
+    since: string = null,
+  ): Promise<KlaviyoEvent<TP, TE>[]> {
+    const events: KlaviyoEvent<TP, TE>[] = [];
+    let url = `https://a.klaviyo.com/api/v1/person/${id}/metric/${metricId}/timeline?api_key=${encodeURI(this.apiKey)}`;
+
+    if (since != null) {
+      url = `${url}&since=${encodeURI(since)}`;
+    }
+
+    const res: Response = await fetch(url);
+
+    if (res.ok) {
+      const data = (await res.json()) as PersonEventsResponse<TP, TE>;
+      events.push(...data.data);
+
+      if (data.next != null) {
+        const nextEvents = await this.getProfileEventsByMetric<TP, TE>(id, metricId, data.next);
+        events.push(...nextEvents);
+      }
+    } else if (res.status === 404) {
+      return events;
+    } else if (res.status === 429) {
+      await waitForRetry(res);
+      const nextEvents = await this.getProfileEventsByMetric<TP, TE>(id, metricId, since);
+      events.push(...nextEvents);
+      return events;
+    } else {
+      throw new KlaviyoError(res);
+    }
+
+    return events;
+  }
 }
