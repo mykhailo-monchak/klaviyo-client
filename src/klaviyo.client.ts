@@ -1,5 +1,5 @@
 import { KlaviyoError, KlaviyoEventProperties, KlaviyoTrackProfile } from '.';
-import { encode } from 'punycode';
+import { encode } from 'js-base64';
 import { waitForRetry } from './utils/wait-for-retry';
 import fetch from 'cross-fetch';
 

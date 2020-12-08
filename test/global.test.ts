@@ -6,7 +6,7 @@ import * as dotenv from 'dotenv';
 
 async function test() {
   dotenv.config();
-  const email = 'test@example.com';
+  const email = 'test@gmail.com';
 
   const client = new KlaviyoClient(process.env.TEST_TOKEN);
   const identified = await client.identify({ $email: email });
