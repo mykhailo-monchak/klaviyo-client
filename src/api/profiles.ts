@@ -45,8 +45,6 @@ export class ProfilesKlaviyoApi {
 
     if (res.ok) {
       return (await res.json()) as KlaviyoProfile & T;
-    } else if (res.status === 404) {
-      return null;
     } else if (res.status === 429) {
       await waitForRetry(res);
       return await this.updateProfile(id, profile);
