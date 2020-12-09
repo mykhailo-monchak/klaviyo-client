@@ -1,6 +1,6 @@
 {
   "name": "klaviyo-client",
-  "version": "2.2.3",
+  "version": "2.3.0",
   "description": "Klaviyo API client for Node.js and browser",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
