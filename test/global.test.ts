@@ -33,6 +33,10 @@ async function test() {
   // Lists
   const groupProfiles = await api.Lists.getGroupProfiles(process.env.TEST_GROUP_ID);
   const createdList = await api.Lists.createList('test');
+  const allLists = await api.Lists.getLists();
+  const listDetails = await api.Lists.getListDetails(createdList.list_id);
+  const updatedList = await api.Lists.updateList(createdList.list_id, 'updated');
+  const deletedList = await api.Lists.deleteList(createdList.list_id);
 
   // Profiles
   const profile = await api.Profiles.getProfile(process.env.TEST_PROFILE_ID);

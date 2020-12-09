@@ -64,3 +64,15 @@ export type KlaviyoEvent<TP extends Record<string, unknown>, TE extends Record<s
 export type KlaviyoListIdentifier = {
   list_id: string;
 };
+
+export type KlaviyoList = {
+  list_id: string;
+  list_name: string;
+};
+
+export type KlaviyoListDetails = {
+  list_name: string;
+  created: string;
+  updated: string;
+  folder_name: string;
+};

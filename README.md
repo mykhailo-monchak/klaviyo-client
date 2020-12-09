@@ -21,7 +21,11 @@ The package contains two separate classes:
 - `KlaviyoClient` to identify profiles and track events. Klaviyo Token is needed to use it
 - `KlaviyoApi` to work with Klaviyo API. Klaviyo Token and API key are needed to use it. Currently it supports following operations:
   - Lists - get profiles from list and segments
-  - Lists - create a list
+  - Lists - create list
+  - Lists - get all lists
+  - Lists - get list details
+  - Lists - update list
+  - Lists - delete list
   - Profiles - get complete profile data
   - Profiles - create or update profile data
   - Profiles - get a list of profile events
