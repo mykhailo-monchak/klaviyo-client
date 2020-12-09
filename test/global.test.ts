@@ -29,8 +29,12 @@ async function test() {
   );
 
   const api = new KlaviyoApi(process.env.TEST_API_KEY, process.env.TEST_TOKEN);
-  const groupProfiles = await api.Lists.getGroupProfiles(process.env.TEST_GROUP_ID);
 
+  // Lists
+  const groupProfiles = await api.Lists.getGroupProfiles(process.env.TEST_GROUP_ID);
+  const createdList = await api.Lists.createList('test');
+
+  // Profiles
   const profile = await api.Profiles.getProfile(process.env.TEST_PROFILE_ID);
   const profileCustom = await api.Profiles.getProfile<CustomKlaviyoProfile>(process.env.TEST_PROFILE_ID);
 

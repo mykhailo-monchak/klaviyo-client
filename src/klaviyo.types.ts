@@ -60,3 +60,7 @@ export type KlaviyoEvent<TP extends Record<string, unknown>, TE extends Record<s
   person: KlaviyoProfile & TP;
   statistic_id: string;
 };
+
+export type KlaviyoListIdentifier = {
+  list_id: string;
+};

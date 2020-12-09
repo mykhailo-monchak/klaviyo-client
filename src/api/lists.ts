@@ -1,11 +1,11 @@
-import { KlaviyoError, KlaviyoProfileIdentifier } from '..';
+import { KlaviyoError, KlaviyoListIdentifier, KlaviyoProfileIdentifier } from '..';
 import { waitForRetry } from '../utils/wait-for-retry';
 import fetch from 'cross-fetch';
 
-interface GroupMembersResponse {
+type GroupMembersResponse = {
   marker: number;
   records: KlaviyoProfileIdentifier[];
-}
+};
 
 export class ListsKlaviyoApi {
   constructor(private readonly apiKey: string, private readonly token: string) {}
@@ -41,5 +41,28 @@ export class ListsKlaviyoApi {
     }
 
     return profiles;
+  }
+
+  // See https://www.klaviyo.com/docs/api/v2/lists#post-lists for details
+  public async createList(name: string): Promise<KlaviyoListIdentifier> {
+    const url = `https://a.klaviyo.com/api/v2/lists`;
+
+    const res: Response = await fetch(url, {
+      method: 'post',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ api_key: this.apiKey, list_name: name }),
+    });
+
+    if (res.ok) {
+      const data = (await res.json()) as KlaviyoListIdentifier;
+      return data;
+    } else if (res.status === 429) {
+      await waitForRetry(res);
+      return await this.createList(name);
+    } else {
+      throw new KlaviyoError(res);
+    }
   }
 }
